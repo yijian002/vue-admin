@@ -4,7 +4,7 @@ const LoginUsers = [{
     tuser_account: 'admin',
     tuser_pwd: '123456',
     avatar: 'http://img.wxdesk.com/heroes/heads/none.jpg',
-    name: '小李子'
+    tuser_name: '小李子'
 }];
 
 const Users = [];

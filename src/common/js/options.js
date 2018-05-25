@@ -29,5 +29,6 @@ export default {
         { value: 0, label: '普通更新' },
         { value: 1, label: '重启更新' },
         { value: 2, label: '提示更新' }
-    ]
+    ],
+    defaultpath: ['[DESKTOP]', '[ROOT]', '[WINDOWS]', '[CUR]']
 };

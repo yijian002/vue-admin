@@ -1,3 +1,4 @@
+<!-- 控制台URL参数 -->
 <template>
 	<section>
 		<el-table :data="list" highlight-current-row v-loading="listLoading" style="width: 100%; margin-top: 20px;">
@@ -5,7 +6,7 @@
 			<el-table-column prop="sex" label="大小"></el-table-column>
 			<el-table-column label="操作" width="160">
 				<template scope="scope">
-					<el-button type="primary" size="small" @click="handleDel(scope.$index, scope.row)">编辑</el-button>
+					<el-button type="primary" size="small" @click="handleDel(scope.$index, scope.row)" icon="el-icon-edit" plain></el-button>
 				</template>
 			</el-table-column>
 		</el-table>
@@ -31,5 +32,5 @@
 	}
 </script>
 
-<style type="text/css">
+<style scoped>
 </style>

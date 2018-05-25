@@ -8,32 +8,32 @@ export default {
 
         // mock success request
         mock.onGet('/success').reply(200, {
-            msg: 'success'
+            message: 'success'
         });
 
         // mock error request
         mock.onGet('/error').reply(500, {
-            msg: 'failure'
+            message: 'failure'
         });
 
         //登录
-        mock.onPost('/sysmanage/login').reply(config => {
+        mock.onPost('/sysmanage/login/').reply(config => {
             let { tuser_account, tuser_pwd } = JSON.parse(config.data);
             return new Promise((resolve, reject) => {
-                let user = null;
+                let data = null;
                 setTimeout(() => {
                     let hasUser = LoginUsers.some(u => {
                         if (u.tuser_account === tuser_account && u.tuser_pwd === tuser_pwd) {
-                            user = JSON.parse(JSON.stringify(u));
-                            user.tuser_pwd = undefined;
+                            data = JSON.parse(JSON.stringify(u));
+                            data.tuser_pwd = undefined;
                             return true;
                         }
                     });
 
                     if (hasUser) {
-                        resolve([200, { code: 200, msg: '请求成功', user }]);
+                        resolve([200, { code: 0, message: '请求成功', data }]);
                     } else {
-                        resolve([200, { code: 500, msg: '账号或密码错误' }]);
+                        resolve([200, { code: 500, message: '账号或密码错误' }]);
                     }
                 }, 1000);
             });
@@ -50,7 +50,7 @@ export default {
                 "page_count": 1,
                 "data": [{
                     "tgroup_id": 1,
-                    "tgroup_name": "string",
+                    "tgroup_name": "管理员",
                     "tmember_count": 0,
                     "tlast_time": 0,
                 }]
@@ -75,13 +75,55 @@ export default {
                 "page_count": 1,
                 "data": [{
                     "tuser_account": "string",
+                    "tuser_pwd": 'tuser_pwd',
                     "tuser_name": "string",
-                    "tgroup_id": "string",
+                    "tgroup_id": 1,
                     "group_name": "string",
                     "tcreater": "string",
                     "tcreater_time": 0,
                     "tlogin_time": 0,
                 }]
+            };
+
+            return new Promise((resolve, reject) => {
+                setTimeout(() => {
+                    resolve([200, datas]);
+                }, 1000);
+            });
+        });
+
+        // 新增系统用户
+        mock.onPost('/sysmanage/user/').reply(res => {
+            let datas = {
+                "code": 0,
+                "message": "ok"
+            };
+
+            return new Promise((resolve, reject) => {
+                setTimeout(() => {
+                    resolve([200, datas]);
+                }, 1000);
+            });
+        });
+
+        // 修改系统用户
+        mock.onPut('/sysmanage/user/').reply(res => {
+            let datas = {
+                "code": 1,
+                "message": "编辑失败"
+            };
+
+            return new Promise((resolve, reject) => {
+                setTimeout(() => {
+                    resolve([200, datas]);
+                }, 1000);
+            });
+        });
+        // 删除系统用户
+        mock.onDelete('/sysmanage/user/').reply(res => {
+            let datas = {
+                "code": 0,
+                "message": "ok"
             };
 
             return new Promise((resolve, reject) => {
@@ -254,6 +296,23 @@ export default {
             let datas = {
                 "code": 2,
                 "message": "删除错误演示",
+            };
+
+            return new Promise((resolve, reject) => {
+                setTimeout(() => {
+                    resolve([200, datas]);
+                }, 1000);
+            });
+        });
+
+        //更新包下拉菜单
+        mock.onGet('/throw_strategy/package_menu/').reply(config => {
+            let datas = {
+                "code": 0,
+                "message": "string",
+                "data": [
+                    "v1.2.3","v2.2.3","v3.2.3",
+                ]
             };
 
             return new Promise((resolve, reject) => {

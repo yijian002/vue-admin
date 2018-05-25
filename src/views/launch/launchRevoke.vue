@@ -1,3 +1,4 @@
+<!-- 投放/撤销 -->
 <template>
     <section>
         <el-tabs type="card" style="height: 200px; margin-top: 20px;">
@@ -6,16 +7,16 @@
                 <el-row :gutter="20">
                     <el-col :span="6" class="line-right">
                         <h3>按帐号投放更新包</h3>
-                        <el-form :label-position="'left'" label-width="86px">
+                        <el-form size="mini" :model="formPackage" ref="packageForm" :label-position="'left'" label-width="86px">
                             <el-form-item label="更新包类型">
-                                <el-select v-model="formPackage.itype">
+                                <el-select v-model="formPackage.itype" @change="updateFormPackageVersion">
                                     <el-option v-for="item in options.packageType" :key="item.value" :label="item.label" :value="item.value">
                                     </el-option>
                                 </el-select>
                             </el-form-item>
                             <el-form-item label="版本号">
-                                <el-select v-model="formPackage.szipname">
-                                    <el-option v-for="item in options.version" :key="item.value" :label="item.label" :value="item.value">
+                                <el-select v-model="formPackage.szipname" v-loading="formPackageVersionLoading">
+                                    <el-option v-for="item in formPackageVersion" :key="item" :label="item" :value="item">
                                     </el-option>
                                 </el-select>
                             </el-form-item>
@@ -29,12 +30,15 @@
                                 <el-checkbox label="强制更新" name="force_update" v-model="formPackage.force_update"></el-checkbox>
                                 <el-checkbox label="紧急更新" name="urgency" v-model="formPackage.urgency" style="margin-left: 40px;"></el-checkbox>
                             </el-col>
-                            <el-input type="textarea" v-model="formPackage.sremark" style="margin-top: 20px;"></el-input>
-                            <div>更新包备注：</div>
+                            <el-input type="textarea" v-model="formPackage.id_list" placeholder="输入网吧帐号，逗号隔开。" style="margin-top: 20px;"></el-input>
+
+                            <el-form-item label="更新包备注" style="margin-top:20px;">
+                               <el-input v-model="formPackage.sremark"></el-input>
+                            </el-form-item>
                             <el-button size="medium" type="primary" style="margin-top: 20px;" @click="addPackage">确认投放</el-button>
                         </el-form>
                     </el-col>
-
+ 
                     <el-col :span="18">
                         <h3>默认更新包</h3>
                         <el-table :data="listUpdatePackage" highlight-current-row v-loading="listLoadingUpdatePackage" style="width: 100%;">
@@ -54,16 +58,16 @@
 
             <el-tab-pane label="查询或撤销">
                 <el-col :span="24" class="toolbar" style="padding-bottom: 0px;">
-                    <el-form size="small" :inline="true">
+                    <el-form size="mini" :inline="true">
                         <el-form-item label="更新包类型">
-                            <el-select v-model="formRevoke.itype">
+                            <el-select v-model="formRevoke.itype" @change="updateFormRevokeVersion">
                                 <el-option v-for="item in options.packageTypes" :key="item.value" :label="item.label" :value="item.value">
                                 </el-option>
                             </el-select>
                         </el-form-item>
                         <el-form-item label="版本号">
-                            <el-select v-model="formRevoke.szipname">
-                                <el-option v-for="item in options.version" :key="item.value" :label="item.label" :value="item.value">
+                            <el-select v-model="formRevoke.szipname" v-loading="formRevokeVersionLoading">
+                                <el-option v-for="item in formRevokeVersion" :key="item" :label="item" :value="item">
                                 </el-option>
                             </el-select>
                         </el-form-item>
@@ -71,7 +75,7 @@
                             <el-input v-model="formRevoke.snbid" :maxlength="40"></el-input>
                         </el-form-item>
                         <el-form-item>
-                            <el-button type="primary" size="small" @click="getListRevoke">查询</el-button>
+                            <el-button type="primary" @click="getListRevoke">查询</el-button>
                         </el-form-item>
                     </el-form>
                 </el-col>
@@ -93,13 +97,12 @@
 
 
         <!--修改更新包-->
-		<el-dialog title="设置默认包" :visible.sync="updatePackageFormVisible" :close-on-click-modal="false" width="30%">
-		    <el-form :model="updatePackageForm" ref="updatePackageForm" label-width="95px">
+		<el-dialog title="设置默认包" :visible.sync="updatePackageFormVisible" :close-on-click-modal="false" width="400px">
+		    <el-form size="mini" :model="updatePackageForm" ref="updatePackageForm" label-width="95px">
 		        <el-form-item label="更新包类型"><b>{{updatePackageForm.itype_name}}</b></el-form-item>
 		        <el-form-item label="版本号">
 		            <el-select v-model="updatePackageForm.szipname">
-                        <el-option v-for="item in updatePackageFormVersion" :key="item.value" :label="item.label" :value="item.value">
-                        </el-option>
+                        <el-option v-for="item in updatePackageFormVersion" :key="item" :label="item" :value="item"></el-option>
                     </el-select>
 		        </el-form-item>
 		        <el-form-item label="备注">{{updatePackageForm.sremark}}</el-form-item>
@@ -110,7 +113,7 @@
 		</el-dialog>
 
 		<!--修改更新包-->
-		<el-dialog title="投放结果" :visible.sync="addPackageResultVisible" :close-on-click-modal="false" width="50%">
+		<el-dialog title="投放结果" :visible.sync="addPackageResultVisible" :close-on-click-modal="false" width="800px">
 		    <el-row>
 				<el-col :span="12">
 					<div style="margin: 0 0 10px 20px;">成功：{{addPackageResultSuccess.length}}</div>
@@ -125,11 +128,24 @@
     </section>
 </template>
 
-<script>
+<script type="text/javascript">
 	import { Loading } from 'element-ui';
-	// import util from '../../common/js/util'
-	import opts from '../../common/js/options'
+	import comm from '../../common/js/comm';
+	import opts from '../../common/js/options';
 	import api from '../../api/api';
+
+	let app = {
+		getPackageVersion(itype, idefault, callback) { // 更新包下拉菜单 0-非默认包， 1-默认包
+			api.get('/throw_strategy/package_menu/', {itype: itype, idefault: idefault}).then((res) => {
+				if(res.code !== 0) {
+					callback([]);
+					return;
+				}
+
+				callback(res.data || []);
+			});
+		}
+	};
 	
 	export default {
 	    data() {
@@ -137,13 +153,12 @@
 	            options: {
 	                packageTypes: opts.packageTypes,
 	                packageType: opts.packageType,
-	                version: [],
 	                updateType: opts.forceType
 	            },
 	            formPackage: {
-	                itype: '', // 更新类型
+	                itype: '', // 更新包类型
 	                szipname: '', // 版本号
-	                id_list: '*', // id_list为网吧账号, '*'为全国投放
+	                id_list: '', // id_list为网吧账号
 	                force_type: 0, // 是否立即生效：0 普通更新，1 重启更新, 2 提示更新
 	                force_update: false, // 是否强制更新：0-否，1-是
 	                urgency: false, // 是否紧急：0-否，1-是
@@ -154,13 +169,14 @@
 	                szipname: '',
 	                snbid: '',
 	                page: 1,
-	                page_limit: 100
+	                page_limit: 1000
 	            },
+	            formPackageVersion: [], // 投放更新包-版本号
+	            formPackageVersionLoading: false,
+	            formRevokeVersion: [], // 查询撤销-版本号
+	            formRevokeVersionLoading: false,
 
-	            listPackage: {
-	            	page: 1,
-	            	page_limit: 100
-	            },
+	            listPackage: {page: 1, page_limit: 100},
 	            listLoadingUpdatePackage: false,
 	            listUpdatePackage: [],
 
@@ -185,6 +201,7 @@
 				api.get('/throw_strategy/strategy_package/', params).then((res) => {
 					this.listLoadingUpdatePackage = false;
 
+					res.data = res.data || [];
 					for (var i = 0; i < res.data.length; i++) {
 						res.data[i].itype_name = opts.findPackageName(res.data[i].itype);
 						res.data[i].throw_count = res.data[i].idefault ? '默认包' : res.data[i].throw_count;
@@ -198,6 +215,7 @@
 
 				params.force_update = params.force_update ? 1 : 0;
 				params.urgency = params.urgency ? 1 : 0;
+				params.id_list = params.id_list ? params.id_list.split(',') : '';
 
 				if(!params.itype) {
 					this.$message({message: '请选择更新包类型', type: 'warning'});
@@ -209,9 +227,13 @@
 					return;
 				}
 
+				if(!params.id_list) {
+					this.$message({message: '请输入投放的网吧帐号，逗号隔开', type: 'warning'});
+					return;
+				}
+
 				this.$confirm('确认投放更新包吗？', '投放提示', {type: 'warning'}).then(() => {
 					let loading = Loading.service({ fullscreen: true, text: '提交投放更新...' });
-
 					api.post('/throw_strategy/strategy_package/', params).then((res) => {
 						loading.close();
 						if(res.code !== 0) {
@@ -219,19 +241,46 @@
 							return;
 						}
 
+						if(this.$refs.packageForm !== undefined) {
+							this.$refs.packageForm.resetFields();
+						}
+						else {
+							this.formPackage = {
+				                itype: '',
+				                szipname: '',
+				                id_list: '',
+				                force_type: 0,
+				                force_update: false,
+				                urgency: false,
+				                sremark: ''
+				            };
+						}
+
 						this.addPackageResultVisible = true;
 						this.addPackageResultSuccess = res.data.success || [];
 						this.addPackageResultFail = res.data.failed || [];
+						this.getListRevoke();
 					});
+				});
+			},
+			updateFormPackageVersion() {
+				this.formPackageVersionLoading = true;
+				app.getPackageVersion(this.formPackage.itype, 1, (list) => {
+					this.formPackage.szipname = '';
+					this.formPackageVersionLoading = false;
+					this.formPackageVersion = list;
 				});
 			},
 			handleUpdatePackage(idx, row) {
 				this.updatePackageFormVisible = true;
 				this.updatePackageForm = row;
+
+				app.getPackageVersion(row.itype, 1, (list) => {
+					this.updatePackageFormVersion = list;
+				});
 			},
 			UpdatePackage() { // 更新投放包
-				var _this = this,
-					params = {szipname: this.updatePackageForm.szipname, itype: this.updatePackageForm.szipname};
+				var params = {szipname: this.updatePackageForm.szipname, itype: this.updatePackageForm.itype};
 
 				api.put('/throw_strategy/strategy_package/', params).then((res) => {
 					if(res.code !== 0) {
@@ -239,8 +288,17 @@
 						return;
 					}
 
-					_this.updatePackageFormVisible = false;
-					_this.getListPackage();
+					this.updatePackageFormVisible = false;
+					this.$message({message: '设置成功', type: 'success'});
+					this.getListPackage();
+				});
+			},
+			updateFormRevokeVersion() {
+				this.formRevokeVersionLoading = true;
+				app.getPackageVersion(this.formRevoke.itype, 0, (list) => {
+					this.formRevoke.szipname = '';
+					this.formRevokeVersionLoading = false;
+					this.formRevokeVersion = list;
 				});
 			},
 	        getListRevoke() { // 查询投放记录
@@ -250,8 +308,11 @@
 				api.get('/throw_strategy/record/', params).then((res) => {
 					this.listLoadingRevoke = false;
 
+					res.data = res.data || [];
 					for (var i = 0; i < res.data.length; i++) {
-						res.data[i].itype_name = opts.findPackageName(res.data[i].itype);
+						let item = res.data[i];
+						item.itype_name = opts.findPackageName(item.itype);
+						item.iinserttime = comm.getDate(item.iinserttime);
 					}
 
 					this.listRevoke = res.data;
@@ -281,11 +342,12 @@
 	    mounted() {
 	    	this.getListPackage();
 	    	this.getListRevoke();
+	    	this.updateFormRevokeVersion();
 	    }
 	}
 </script>
 
-<style type="text/css">
+<style>
 .el-textarea__inner {
     height: 100px;
 }

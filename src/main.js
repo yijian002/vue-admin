@@ -1,24 +1,23 @@
 import babelpolyfill from 'babel-polyfill'
 import Vue from 'vue'
 import App from './App'
+import 'font-awesome/css/font-awesome.min.css'
 import ElementUI from 'element-ui'
 import 'element-ui/lib/theme-chalk/index.css'
-import 'font-awesome/css/font-awesome.min.css'
 
 import VueRouter from 'vue-router'
 import store from './vuex/store'
 import Vuex from 'vuex'
 import routes from './routes'
-import Mock from './mock'
-Mock.bootstrap();
+
+// import Mock from './mock'
+// Mock.bootstrap();
 
 Vue.use(ElementUI)
 Vue.use(VueRouter)
 Vue.use(Vuex)
 
-const router = new VueRouter({
-    routes
-})
+const router = new VueRouter({routes})
 
 router.beforeEach((to, from, next) => {
     if (to.path == '/login') {

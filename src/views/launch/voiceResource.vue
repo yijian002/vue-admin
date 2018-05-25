@@ -1,3 +1,4 @@
+<!-- 语音资源 -->
 <template>
 	<section>
 		<el-tabs type="card" @tab-click="tabClick" style="margin-top: 10px;">
@@ -18,16 +19,16 @@
 			<el-table-column prop="isize" label="大小"></el-table-column>
 			<el-table-column label="操作" width="160">
 				<template scope="scope">
-					<el-button type="danger" size="mini" @click="delVoice(scope.$index, scope.row)" plain>删除</el-button>
+					<el-button type="danger" size="mini" @click="delVoice(scope.$index, scope.row)" icon="el-icon-delete" plain></el-button>
 				</template>
 			</el-table-column>
 		</el-table>
 
 		<!--新增界面-->
 		<el-dialog title="添加语音" :visible.sync="addFormVisible" :close-on-click-modal="false" width="30%">
-		    <el-form label-width="95px">
+		    <el-form size="mini" label-width="95px">
 		        <el-form-item label="语音文件">
-		            <el-upload class="upload-demo" ref="upload" action="/throw_strategy/voice/" :limit="1" :on-success="handleFileSuccess" :on-error="handleFileError" :file-list="addFileList" :data="addForm" :auto-upload="false">
+		            <el-upload class="upload-demo" ref="upload" action="/throw_strategy/voice/" :limit="1" :on-success="handleFileSuccess" :on-error="handleFileError" :file-list="addFileList" :data="addForm" :auto-upload="false" accept=".mp3,.wav">
 		                <el-button size="small" type="primary">选择语音文件</el-button>
 		            </el-upload>
 		        </el-form-item>
@@ -54,7 +55,7 @@
 					{name: 'Lily版', voice_type: 'lily'}
 				],
 				page: 1,
-				page_limit: 100,
+				page_limit: 1000,
 				voice_type: 'official',
 				total_num: 0,
 				total_size: 0,
@@ -78,6 +79,12 @@
 				api.get('/throw_strategy/voice/', params).then((res) => {
 					this.listLoading = false;
 
+					if(res.code !== 0) {
+						this.$message({message: res.message});
+						return;
+					}
+
+					res.data = res.data || [];
 					for (var i = 0; i < res.data.length; i++) {
 						res.data[i].isize += 'kb';
 					}
@@ -90,6 +97,7 @@
 				this.page = 1;
 				this.total_num = 0;
 				this.total_size = 0;
+				this.list = [];
 				this.voice_type = this.tabs[tab.index].voice_type;
 				this.getList();
 			},
@@ -139,5 +147,5 @@
 	}
 </script>
 
-<style type="text/css">
+<style scoped>
 </style>

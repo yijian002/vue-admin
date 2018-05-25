@@ -7,79 +7,62 @@
         <el-form-item prop="checkPass">
             <el-input type="password" v-model="ruleForm2.checkPass" auto-complete="off" placeholder="密码"></el-input>
         </el-form-item>
-        <el-checkbox v-model="checked" checked class="remember">记住密码</el-checkbox>
+        <!-- <el-checkbox v-model="checked" checked class="remember">记住密码</el-checkbox> -->
         <el-form-item style="width:100%;">
-            <el-button type="primary" style="width:100%;" @click.native.prevent="handleSubmit2" :loading="logining">登录</el-button>
-            <!--<el-button @click.native.prevent="handleReset2">重置</el-button>-->
+            <el-button type="primary" style="width:100%;" @click.native.prevent="handleSubmit" :loading="logining">登录</el-button>
         </el-form-item>
     </el-form>
 </template>
 <script>
-import { requestLogin } from '../api/api';
+    import { requestLogin} from '../api/api';
 
-export default {
-    data() {
+    export default {
+        data() {
             return {
                 logining: false,
                 ruleForm2: {
-                    account: 'admin',
-                    checkPass: '123456'
+                    account: '',
+                    checkPass: ''
                 },
                 rules2: {
-                    account: [{
-                        required: true,
-                        message: '请输入账号',
-                        trigger: 'blur'
-                    }, ],
-                    checkPass: [{
-                        required: true,
-                        message: '请输入密码',
-                        trigger: 'blur'
-                    }, ]
+                    account: [{required: true, message: '请输入账号', trigger: 'blur'}],
+                    checkPass: [{required: true, message: '请输入密码', trigger: 'blur'}]
                 },
                 checked: true
             };
         },
         methods: {
-            handleReset2() {
-                this.$refs.ruleForm2.resetFields();
-            },
-            handleSubmit2(ev) {
-                var _this = this;
+            handleSubmit() {
                 this.$refs.ruleForm2.validate((valid) => {
-                    if (valid) {
-                        this.logining = true;
-                        var loginParams = {
-                            tuser_account: this.ruleForm2.account,
-                            tuser_pwd: this.ruleForm2.checkPass
-                        };
-                        requestLogin(loginParams).then(data => {
-                            this.logining = false;
-                            let {
-                                msg,
-                                code,
-                                user
-                            } = data;
-                            if (code !== 200) {
-                                this.$message({
-                                    message: msg,
-                                    type: 'error'
-                                });
-                            } else {
-                                sessionStorage.setItem('user', JSON.stringify(user));
-                                this.$router.push({
-                                    path: '/index'
-                                });
-                            }
-                        });
-                    } else {
-                        console.log('error submit!!');
-                        return false;
+                    if (!valid) {
+                        return;
                     }
+
+                    this.logining = true;
+                    var loginParams = {
+                        tuser_account: this.ruleForm2.account,
+                        tuser_pwd: this.ruleForm2.checkPass
+                    };
+
+                    requestLogin(loginParams).then(res => {
+                        this.logining = false;
+                        let {
+                            message,
+                            code,
+                            data
+                        } = res;
+
+                        if (code !== 0) {
+                            this.$message({message: message || '登录失败，请检查输入是否正确！', type: 'error'});
+                        } else {
+                            sessionStorage.setItem('user', JSON.stringify(data));
+                            this.$router.push({ path: '/index' });
+                        }
+                    });
                 });
             }
         }
-}
+    }
 </script>
 <style lang="scss" scoped>
 .login-container {
