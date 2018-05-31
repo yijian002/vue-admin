@@ -75,7 +75,7 @@
                             <el-input v-model="formRevoke.snbid" :maxlength="40"></el-input>
                         </el-form-item>
                         <el-form-item>
-                            <el-button type="primary" @click="getListRevoke">查询</el-button>
+                            <el-button type="primary" @click="formRevoke.page=1;getListRevoke()">查询</el-button>
                         </el-form-item>
                     </el-form>
                 </el-col>
@@ -91,6 +91,7 @@
 
                 <el-col :span="24" class="toolbar">
                     <el-button type="danger" size="small" @click="removeRevokes" :disabled="this.selsRevoke.length===0">撤销选中</el-button>
+                    <el-pagination layout="prev, pager, next" @current-change="handleCurrentChangeRevoke" :current-page="formRevoke.page" :page-size="formRevoke.page_limit" :total="formRevoke.total" style="float:right;"></el-pagination>
                 </el-col>
             </el-tab-pane>
         </el-tabs>
@@ -168,8 +169,9 @@
 	                itype: 0,
 	                szipname: '',
 	                snbid: '',
+	                total: 0,
 	                page: 1,
-	                page_limit: 1000
+	                page_limit: 20
 	            },
 	            formPackageVersion: [], // 投放更新包-版本号
 	            formPackageVersionLoading: false,
@@ -265,7 +267,7 @@
 			},
 			updateFormPackageVersion() {
 				this.formPackageVersionLoading = true;
-				app.getPackageVersion(this.formPackage.itype, 1, (list) => {
+				app.getPackageVersion(this.formPackage.itype, 0, (list) => {
 					this.formPackage.szipname = '';
 					this.formPackageVersionLoading = false;
 					this.formPackageVersion = list;
@@ -275,7 +277,7 @@
 				this.updatePackageFormVisible = true;
 				this.updatePackageForm = row;
 
-				app.getPackageVersion(row.itype, 1, (list) => {
+				app.getPackageVersion(row.itype, 0, (list) => {
 					this.updatePackageFormVersion = list;
 				});
 			},
@@ -295,7 +297,7 @@
 			},
 			updateFormRevokeVersion() {
 				this.formRevokeVersionLoading = true;
-				app.getPackageVersion(this.formRevoke.itype, 0, (list) => {
+				app.getPackageVersion(this.formRevoke.itype, '', (list) => {
 					this.formRevoke.szipname = '';
 					this.formRevokeVersionLoading = false;
 					this.formRevokeVersion = list;
@@ -307,6 +309,7 @@
 	        	this.listLoadingRevoke = true;
 				api.get('/throw_strategy/record/', params).then((res) => {
 					this.listLoadingRevoke = false;
+					this.formRevoke.total = res.total;
 
 					res.data = res.data || [];
 					for (var i = 0; i < res.data.length; i++) {
@@ -318,10 +321,14 @@
 					this.listRevoke = res.data;
 				});
 	        },
+	        handleCurrentChangeRevoke(val) {
+	        	this.formRevoke.page = val;
+				this.getListRevoke();
+	        },
 	        removeRevokes() { // 撤销投放
 	        	let ids = this.selsRevoke.map(item => item.id);
 
-	        	this.$confirm('确认撤销选中的投放吗？', '撤销提示', {type: 'warning'}).then(() => {
+	        	this.$confirm('正在撤销'+ ids.length +'个帐号的投放，点击确定继续撤销', '撤销提示', {type: 'warning'}).then(() => {
 					this.listLoadingRevoke = true;
 					api.put('/throw_strategy/record/', {id: ids}).then((res) => {
 						this.listLoadingRevoke = false;

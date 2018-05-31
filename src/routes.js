@@ -7,6 +7,7 @@ import launchRevoke from './views/launch/launchRevoke.vue'
 import launchVoiceResource from './views/launch/voiceResource.vue'
 // 配置管理
 import configControlUrlParams from './views/configure/controlUrlParams.vue'
+import configVersionLimit from './views/configure/versionLimit.vue'
 // 系统管理
 import systemUsers from './views/system/users.vue'
 
@@ -77,6 +78,7 @@ let menu_pages = [{
     iconCls: 'el-icon-document',
     children: [
         { path: '/configControlUrlParams', component: configControlUrlParams, name: '控制台URL参数', hidden: isHiddenMenuChildren },
+        { path: '/configVersionLimit', component: configVersionLimit, name: '版本限制', hidden: isHiddenMenuChildren },
     ]
 }, {
     path: '',

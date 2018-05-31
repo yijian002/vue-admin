@@ -6,5 +6,5 @@ module.exports = merge(prodEnv, {
     LOG_DEBUG: true,
     IS_HTTP_PROXY: true,
     HTTP_PROXY_TARGET: 'http://10.34.53.178:8000',
-    HTTP_PROXY_CONTEXT: ['/sysmanage', '/throw_strategy'],
+    HTTP_PROXY_CONTEXT: ['/sysmanage', '/throw_strategy', '/console_configuration'],
 })

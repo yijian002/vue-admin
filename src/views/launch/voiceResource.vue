@@ -86,11 +86,11 @@
 
 					res.data = res.data || [];
 					for (var i = 0; i < res.data.length; i++) {
-						res.data[i].isize += 'kb';
+						res.data[i].isize = (res.data[i].isize/1024).toFixed(2) + 'kb';
 					}
 					this.list = res.data;
 					this.total_num = res.total;
-					this.total_size = res.total_size;
+					this.total_size = (res.total_size/1024).toFixed(2);
 				});
 			},
 			tabClick(tab, event) {
