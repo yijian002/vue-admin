@@ -1,5 +1,6 @@
 import Login from './views/Login.vue'
 import NotFound from './views/404.vue'
+import Index from './views/index.vue'
 import Home from './views/Home.vue'
 // 投放管理
 import launchUpdatePackage from './views/launch/updatePackage.vue'
@@ -8,6 +9,7 @@ import launchVoiceResource from './views/launch/voiceResource.vue'
 // 配置管理
 import configControlUrlParams from './views/configure/controlUrlParams.vue'
 import configVersionLimit from './views/configure/versionLimit.vue'
+import configDrive from './views/configure/drive.vue'
 // 系统管理
 import systemUsers from './views/system/users.vue'
 
@@ -47,8 +49,9 @@ let def_pages = [{
         hidden: isHiddenMenu
     }, {
         path: '/index', // 初始页
+        component: Index,
         hidden: isHiddenMenu,
-        redirect: { path: '/launchUpdatePackage' }
+        // redirect: { path: '/launchUpdatePackage' }
     }],
     not_page = [{
         path: '*',
@@ -79,6 +82,7 @@ let menu_pages = [{
     children: [
         { path: '/configControlUrlParams', component: configControlUrlParams, name: '控制台URL参数', hidden: isHiddenMenuChildren },
         { path: '/configVersionLimit', component: configVersionLimit, name: '版本限制', hidden: isHiddenMenuChildren },
+        { path: '/configDrive', component: configDrive, name: '驱动配置', hidden: isHiddenMenuChildren },
     ]
 }, {
     path: '',

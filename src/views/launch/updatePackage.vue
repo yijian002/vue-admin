@@ -2,17 +2,17 @@
 <template>
 	<section>
 		<el-col :span="24" class="toolbar" style="padding-bottom: 0px;">
-		    <el-form size="small" :inline="true">
+		    <el-form size="mini" :inline="true">
 		        <el-form-item label="更新包类型">
 		            <el-select v-model="optionsValue">
 		                <el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value"></el-option>
 		            </el-select>
 		        </el-form-item>
 		        <el-form-item>
-		            <el-button type="primary" @click="queryList">查询</el-button>
+		            <el-button type="primary" icon="el-icon-search" @click="queryList">查询</el-button>
 		        </el-form-item>
 		        <el-form-item>
-		            <el-button type="success" @click="handleListAdd">添加更新包</el-button>
+		            <el-button type="success" icon="el-icon-plus" @click="handleListAdd">添加更新包</el-button>
 		        </el-form-item>
 		    </el-form>
 		</el-col>

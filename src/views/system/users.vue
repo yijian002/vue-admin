@@ -5,7 +5,7 @@
             <el-row>
                 <el-col :span="16"><h3>用户组</h3></el-col>
                 <el-col :span="8" style="text-align: right;">
-                    <el-button type="primary" size="small" @click="handleAddGroup">增加组</el-button>
+                    <el-button type="success" icon="el-icon-plus" size="mini" @click="handleAddGroup">增加组</el-button>
                 </el-col>
             </el-row>
         </el-col>
@@ -25,7 +25,7 @@
 		<el-dialog :title="groupFormIsAdd ? '添加用户组' : '编辑用户组'" :visible.sync="groupFormVisible" :close-on-click-modal="false" width="500px">
 		    <el-form size="small" :model="groupForm" :rules="groupFormRules" ref="groupForm" label-width="100px" style="width:360px;margin: 0 auto;">
 		        <el-form-item label="用户组名称" prop="tgroup_name" required>
-		            <el-input v-model="groupForm.tgroup_name" :maxlength="10" :disabled="groupFormIsAdd?false:true"></el-input>
+		            <el-input v-model="groupForm.tgroup_name" :disabled="groupFormIsAdd ? false : true"></el-input>
 		        </el-form-item>
 		        <el-form-item label="用户组权限">
 		     		<el-tree :data="groupMenuTree" :props="defaultProps" ref="groupMenuTree" node-key="path" show-checkbox default-expand-all check-on-click-node :expand-on-click-node="false" :default-checked-keys="groupForm.tgroup_authority"></el-tree>
@@ -40,7 +40,7 @@
             <el-row>
                 <el-col :span="16"><h3>用户</h3></el-col>
                 <el-col :span="8" style="text-align: right;">
-                    <el-button type="primary" size="small" @click="handleAddUser">增加用户</el-button>
+                    <el-button type="success" icon="el-icon-plus" size="mini" @click="handleAddUser">增加用户</el-button>
                 </el-col>
             </el-row>
         </el-col>
@@ -62,13 +62,13 @@
 		<el-dialog :title="userFormIsAdd ? '添加用户' : '编辑用户'" :visible.sync="userFormVisible" :close-on-click-modal="false" width="400px">
 		    <el-form size="small" :model="userForm" :rules="userFormRules" ref="userForm" label-width="70px" style="width:290px;margin: 0 auto;">
 		        <el-form-item label="用户名" prop="tuser_account" required>
-		            <el-input v-model="userForm.tuser_account" :maxlength="10" :disabled="userFormIsAdd?false:true"></el-input>
+		            <el-input v-model="userForm.tuser_account" :disabled="userFormIsAdd?false:true"></el-input>
 		        </el-form-item>
 		        <el-form-item label="密码" prop="tuser_pwd" required>
 		            <el-input v-model="userForm.tuser_pwd" :maxlength="20"></el-input>
 		        </el-form-item>
 		        <el-form-item label="姓名" prop="tuser_name" required>
-		            <el-input v-model="userForm.tuser_name" :maxlength="10"></el-input>
+		            <el-input v-model="userForm.tuser_name"></el-input>
 		        </el-form-item>
 		        <el-form-item label="用户组" prop="tgroup_id" required>
 		            <el-select v-model="userForm.tgroup_id">

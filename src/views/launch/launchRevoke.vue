@@ -40,7 +40,10 @@
                     </el-col>
  
                     <el-col :span="18">
-                        <h3>默认更新包</h3>
+                        <el-row>
+                        	<el-col :span="12"><h3>默认更新包</h3></el-col>
+                        	<el-col :span="12" style="text-align: right;"><el-button type="success" size="mini" icon="el-icon-plus" @click="handleAddPackage">新增默认包</el-button></el-col>
+                        </el-row>
                         <el-table :data="listUpdatePackage" highlight-current-row v-loading="listLoadingUpdatePackage" style="width: 100%;">
                             <el-table-column prop="itype_name" label="更新包类型"></el-table-column>
                             <el-table-column prop="szipname" label="版本号"></el-table-column>
@@ -75,7 +78,7 @@
                             <el-input v-model="formRevoke.snbid" :maxlength="40"></el-input>
                         </el-form-item>
                         <el-form-item>
-                            <el-button type="primary" @click="formRevoke.page=1;getListRevoke()">查询</el-button>
+                            <el-button type="primary" icon="el-icon-search" @click="formRevoke.page=1;getListRevoke()">查询</el-button>
                         </el-form-item>
                     </el-form>
                 </el-col>
@@ -90,7 +93,7 @@
                 </el-table>
 
                 <el-col :span="24" class="toolbar">
-                    <el-button type="danger" size="small" @click="removeRevokes" :disabled="this.selsRevoke.length===0">撤销选中</el-button>
+                    <el-button type="danger" size="mini" @click="removeRevokes" :disabled="this.selsRevoke.length===0">撤销选中</el-button>
                     <el-pagination layout="prev, pager, next" @current-change="handleCurrentChangeRevoke" :current-page="formRevoke.page" :page-size="formRevoke.page_limit" :total="formRevoke.total" style="float:right;"></el-pagination>
                 </el-col>
             </el-tab-pane>
@@ -126,6 +129,28 @@
 				</el-col>
 			</el-row>
 		</el-dialog>
+
+		<!--新增默认包-->
+		<el-dialog title="上传" :visible.sync="addFormPackageVisible" :close-on-click-modal="false" width="350px">
+		    <el-form size="small" :model="addFormPackage" ref="addFormPackage" label-width="95px">
+		        <el-form-item label="更新包类型" prop="itype" required>
+		            <el-select v-model="addFormPackage.itype" @change="updateAddFormPackageVersion">
+		                <el-option v-for="item in options.packageType" :key="item.value" :label="item.label" :value="item.value">
+		                </el-option>
+		            </el-select>
+		        </el-form-item>
+		        <el-form-item label="版本号" prop="szipname" required>
+		            <el-select v-model="addFormPackage.szipname" @change="handleChangeFormPackageVersion">
+                        <el-option v-for="item in addFormPackageVersion" :key="item.szipname" :label="item.szipname" :value="item.szipname"></el-option>
+                    </el-select>
+		        </el-form-item>
+		        <el-form-item label="备注"><el-col>{{addFormPackage.sremark}}</el-col></el-form-item>
+		    </el-form>
+		    <div slot="footer" class="dialog-footer">
+		        <el-button type="primary" @click="addDefaultPackage">保存</el-button>
+		    </div>
+		</el-dialog>
+
     </section>
 </template>
 
@@ -190,6 +215,10 @@
 	            updatePackageForm: {},
 	            updatePackageFormVersion: [],
 
+	            addFormPackageVisible: false,
+	            addFormPackage: {},
+	            addFormPackageVersion: [],
+
 	            listLoadingRevoke: false,
 	            listRevoke: [],
 	            selsRevoke: []
@@ -205,8 +234,10 @@
 
 					res.data = res.data || [];
 					for (var i = 0; i < res.data.length; i++) {
-						res.data[i].itype_name = opts.findPackageName(res.data[i].itype);
-						res.data[i].throw_count = res.data[i].idefault ? '默认包' : res.data[i].throw_count;
+						let item = res.data[i];
+						item.itype_name = opts.findPackageName(item.itype);
+						item.throw_count = item.idefault ? '默认包' : item.throw_count;
+						item.iinserttime = comm.getDate(item.iinserttime);
 					}
 
 					this.listUpdatePackage = res.data;
@@ -281,8 +312,67 @@
 					this.updatePackageFormVersion = list;
 				});
 			},
+			handleAddPackage() {
+				this.addFormPackageVisible = true;
+				this.addFormPackage = {
+					itype: opts.packageType[0].value,
+					szipname: '',
+					sremark: ''
+				};
+				this.updateAddFormPackageVersion();
+			},
+			updateAddFormPackageVersion() {
+				api.get('/throw_strategy/zipfile/', {page: 1, page_limit: 1000, itype: this.addFormPackage.itype}).then((res) => {
+					if(res.code !== 0) {
+						return;
+					}
+
+					let list = [];
+					for (var i = 0; i < res.data.length; i++) {
+						if(!res.data[i].idefault) {
+							list.push(res.data[i]);
+						}
+					}
+
+					this.addFormPackage.szipname = '';
+					this.addFormPackage.sremark = '';
+					this.addFormPackageVersion = list;
+				});
+			},
+			handleChangeFormPackageVersion() {
+				for (var i = 0; i < this.addFormPackageVersion.length; i++) {
+					if(this.addFormPackageVersion[i].szipname === this.addFormPackage.szipname) {
+						this.addFormPackage.sremark = this.addFormPackageVersion[i].sremark; // 同步显示包备注
+						break;
+					}
+				}
+			},
+			addDefaultPackage() {
+				let params = Object.assign({}, this.addFormPackage);
+				if(!params.szipname) {
+					this.$message({message: '请选择版本号', type: 'warning'});
+					return;
+				}
+
+				params.is_new = 1; // 新增默认包
+				delete params.sremark;
+				api.put('/throw_strategy/strategy_package/', params).then((res) => {
+					if(res.code !== 0) {
+						this.$message({message: res.message, type: 'warning'});
+						return;
+					}
+
+					this.addFormPackageVisible = false;
+					this.$message({message: '新增默认包成功', type: 'success'});
+					this.getListPackage();
+				});
+			},
 			UpdatePackage() { // 更新投放包
-				var params = {szipname: this.updatePackageForm.szipname, itype: this.updatePackageForm.itype};
+				var params = {
+					szipname: this.updatePackageForm.szipname, 
+					itype: this.updatePackageForm.itype,
+					is_new: 0
+				};
 
 				api.put('/throw_strategy/strategy_package/', params).then((res) => {
 					if(res.code !== 0) {

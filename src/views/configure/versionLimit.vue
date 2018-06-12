@@ -18,8 +18,8 @@
                         <el-form-item label="帐号">
                             <el-input v-model="formList.snbid" :maxlength="40"></el-input>
                         </el-form-item>
-                        <el-form-item><el-button type="primary" @click="getList">查询</el-button></el-form-item>
-                        <el-form-item><el-button type="info" @click="exportList">导出查询结果</el-button></el-form-item>
+                        <el-form-item><el-button type="primary" icon="el-icon-search" @click="getList">查询</el-button></el-form-item>
+                        <el-form-item><el-button type="info" icon="el-icon-document" @click="exportList">导出查询结果</el-button></el-form-item>
                     </el-form>
                 </el-col>
 
@@ -32,7 +32,7 @@
                 </el-table>
 
                 <el-col :span="24" class="toolbar">
-                    <el-button type="danger" size="small" @click="removeList" :disabled="this.selsList.length===0">撤销选中</el-button>
+                    <el-button type="danger" size="mini" @click="removeList" :disabled="this.selsList.length===0">撤销选中</el-button>
                 </el-col>
         	</el-tab-pane>
         </el-tabs>

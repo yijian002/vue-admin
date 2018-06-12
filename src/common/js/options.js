@@ -6,6 +6,7 @@ var packageType = [
     { value: 6, label: '计费代理投放' },
     { value: 7, label: 'egs投放' },
     { value: 10, label: '语音大师程序包' },
+    { value: 11, label: '游戏直启' },
 ];
 
 function mergeArr() {
@@ -14,7 +15,7 @@ function mergeArr() {
 
 export default {
     packageType: packageType,
-    packageTypes: mergeArr({ value: 0, label: '不限' }, packageType),
+    packageTypes: mergeArr([{ value: 0, label: '不限' }], packageType),
     findPackageName(val) {
         var name = '';
         for (var i = 0; i < packageType.length; i++) {

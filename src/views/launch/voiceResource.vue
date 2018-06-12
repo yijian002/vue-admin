@@ -7,10 +7,10 @@
 
 		<el-col :span="24" class="toolbar">
 			<el-row>
-				<el-col :span="16" style="line-height: 32px;">当前个数：{{total_num}} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;当前资源类型总个数：{{total_size}}kb
-					<el-button type="primary" size="small" @click="addFormVisible = true" style="margin-left: 40px;">添加语音</el-button>
+				<el-col :span="16" style="line-height: 32px;">当前个数：{{total_num}} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;当前资源类型总大小：{{total_size}}
+					<el-button type="success" size="mini" icon="el-icon-plus" @click="addFormVisible = true;addFileList=[];" style="margin-left: 40px;">添加语音</el-button>
 				</el-col>
-				<el-col :span="8" style="text-align: right;"><el-button type="warning" size="small" @click="updateStrategy"><b>更新策略</b></el-button></el-col>
+				<el-col :span="8" style="text-align: right;"><el-button type="primary" icon="el-icon-refresh" size="mini" @click="updateStrategy"><b>更新策略</b></el-button></el-col>
 			</el-row>
 		</el-col>
 
@@ -28,7 +28,7 @@
 		<el-dialog title="添加语音" :visible.sync="addFormVisible" :close-on-click-modal="false" width="30%">
 		    <el-form size="mini" label-width="95px">
 		        <el-form-item label="语音文件">
-		            <el-upload class="upload-demo" ref="upload" action="/throw_strategy/voice/" :limit="1" :on-success="handleFileSuccess" :on-error="handleFileError" :file-list="addFileList" :data="addForm" :auto-upload="false" accept=".mp3,.wav">
+		            <el-upload class="upload-demo" ref="upload" action="/throw_strategy/voice/" :limit="1" :on-success="handleFileSuccess" :on-error="handleFileError" :on-progress="handleFileProgress" :file-list="addFileList" :data="addForm" :auto-upload="false" accept=".mp3,.wav">
 		                <el-button size="small" type="primary">选择语音文件</el-button>
 		            </el-upload>
 		        </el-form-item>
@@ -44,6 +44,8 @@
 <script>
 	import { Loading } from 'element-ui';
 	import api from '../../api/api';
+
+	var loading_full;
 
 	export default {
 		data() {
@@ -86,11 +88,11 @@
 
 					res.data = res.data || [];
 					for (var i = 0; i < res.data.length; i++) {
-						res.data[i].isize = (res.data[i].isize/1024).toFixed(2) + 'kb';
+						res.data[i].isize = (res.data[i].isize/1024).toFixed(2) + 'KB';
 					}
 					this.list = res.data;
 					this.total_num = res.total;
-					this.total_size = (res.total_size/1024).toFixed(2);
+					this.total_size = res.total_size > (1024*1024) ? (res.total_size/1024/1024).toFixed(2) + 'MB' : (res.total_size/1024).toFixed(2)  + 'KB';
 				});
 			},
 			tabClick(tab, event) {
@@ -101,11 +103,22 @@
 				this.voice_type = this.tabs[tab.index].voice_type;
 				this.getList();
 			},
-			handleFileError(err, file, fileList) {
+			handleFileError() {
 				this.$message({message: '上传失败 [' + err.status + ']', type: 'error'});
+				loading_full.close();
 			},
-			handleFileSuccess(res, file, fileList) {
-				console.log(res, file, fileList)
+			handleFileSuccess(res) {
+				loading_full.close();
+				if(res.code !== 0) {
+					this.$message({message: res.message, type: 'warning'});
+					return;
+				}
+
+				this.$message({message: '添加语音成功', type: 'success'});
+				this.getList();
+			},
+			handleFileProgress() {
+				loading_full = Loading.service({ fullscreen: true, text: '正在上传语音文件...' });
 			},
 			addVoice() {
 				this.addForm.voice_type = this.voice_type;
@@ -128,9 +141,9 @@
 			},
 			updateStrategy() {
 				this.$confirm('即将更新语音资源策略，请确认操作正确！', '更新策略', {type: 'warning'}).then(() => {
-					let loading = Loading.service({ fullscreen: true, text: '更新策略中...' });
+					loading_full = Loading.service({ fullscreen: true, text: '更新策略中...' });
 					api.put('/throw_strategy/voice/').then((res) => {
-						loading.close();
+						loading_full.close();
 						if(res.code !== 0) {
 							this.$message({message: res.message, type: 'warning'});
 							return;
