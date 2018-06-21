@@ -6,7 +6,7 @@
             <el-tab-pane label="投 放">
                 <el-row :gutter="20">
                     <el-col :span="6" class="line-right">
-                        <h3>按帐号投放更新包</h3>
+                        <h3>按账号投放更新包</h3>
                         <el-form size="mini" :model="formPackage" ref="packageForm" :label-position="'left'" label-width="86px">
                             <el-form-item label="更新包类型">
                                 <el-select v-model="formPackage.itype" @change="updateFormPackageVersion">
@@ -20,7 +20,7 @@
                                     </el-option>
                                 </el-select>
                             </el-form-item>
-                            <el-form-item label="更新类型">
+                            <el-form-item label="更新类型" v-show="formPackage.itype==3">
                                 <el-select v-model="formPackage.force_type">
                                     <el-option v-for="item in options.updateType" :key="item.value" :label="item.label" :value="item.value">
                                     </el-option>
@@ -30,7 +30,7 @@
                                 <el-checkbox label="强制更新" name="force_update" v-model="formPackage.force_update"></el-checkbox>
                                 <el-checkbox label="紧急更新" name="urgency" v-model="formPackage.urgency" style="margin-left: 40px;"></el-checkbox>
                             </el-col>
-                            <el-input type="textarea" v-model="formPackage.id_list" placeholder="输入网吧帐号，逗号隔开。" style="margin-top: 20px;"></el-input>
+                            <el-input type="textarea" v-model="formPackage.id_list" placeholder="输入网吧账号，逗号隔开。" style="margin-top: 20px;"></el-input>
 
                             <el-form-item label="更新包备注" style="margin-top:20px;">
                                <el-input v-model="formPackage.sremark"></el-input>
@@ -74,18 +74,17 @@
                                 </el-option>
                             </el-select>
                         </el-form-item>
-                        <el-form-item label="帐号">
+                        <el-form-item label="账号">
                             <el-input v-model="formRevoke.snbid" :maxlength="40"></el-input>
                         </el-form-item>
-                        <el-form-item>
-                            <el-button type="primary" icon="el-icon-search" @click="formRevoke.page=1;getListRevoke()">查询</el-button>
-                        </el-form-item>
+                        <el-form-item><el-button type="primary" icon="el-icon-search" @click="formRevoke.page=1;getListRevoke()">查询</el-button></el-form-item>
+                        <el-form-item><el-button type="info" icon="el-icon-document" @click="exportRevoke">导出查询结果</el-button></el-form-item>
                     </el-form>
                 </el-col>
 
                 <el-table :data="listRevoke" highlight-current-row v-loading="listLoadingRevoke" @selection-change="selsRevokesChange" style="width: 100%;">
                     <el-table-column type="selection" width="55"></el-table-column>
-                    <el-table-column prop="snbid" label="帐号"></el-table-column>
+                    <el-table-column prop="snbid" label="账号"></el-table-column>
                     <el-table-column prop="itype_name" label="更新包类型"></el-table-column>
                     <el-table-column prop="inman" label="投放人"></el-table-column>
                     <el-table-column prop="szipname" label="版本号"></el-table-column>
@@ -243,12 +242,12 @@
 					this.listUpdatePackage = res.data;
 				});
 			},
-			addPackage() { // 按帐号投放更新包
+			addPackage() { // 按账号投放更新包
 				let params = Object.assign({}, this.formPackage);
 
 				params.force_update = params.force_update ? 1 : 0;
 				params.urgency = params.urgency ? 1 : 0;
-				params.id_list = params.id_list ? params.id_list.split(',') : '';
+				params.id_list = comm.setIds(params.id_list);
 
 				if(!params.itype) {
 					this.$message({message: '请选择更新包类型', type: 'warning'});
@@ -261,7 +260,7 @@
 				}
 
 				if(!params.id_list) {
-					this.$message({message: '请输入投放的网吧帐号，逗号隔开', type: 'warning'});
+					this.$message({message: '请输入投放的网吧账号，逗号隔开', type: 'warning'});
 					return;
 				}
 
@@ -411,6 +410,15 @@
 					this.listRevoke = res.data;
 				});
 	        },
+	        exportRevoke() { // 导出投放记录
+	        	let params = {
+	        		itype: this.formRevoke.itype,
+	        		szipname: this.formRevoke.szipname,
+	        		snbid: this.formRevoke.snbid
+	        	};
+
+	        	api.gourl('/throw_strategy/record/export/', params);
+	        },
 	        handleCurrentChangeRevoke(val) {
 	        	this.formRevoke.page = val;
 				this.getListRevoke();
@@ -418,7 +426,7 @@
 	        removeRevokes() { // 撤销投放
 	        	let ids = this.selsRevoke.map(item => item.id);
 
-	        	this.$confirm('正在撤销'+ ids.length +'个帐号的投放，点击确定继续撤销', '撤销提示', {type: 'warning'}).then(() => {
+	        	this.$confirm('正在撤销'+ ids.length +'个账号的投放，点击确定继续撤销', '撤销提示', {type: 'warning'}).then(() => {
 					this.listLoadingRevoke = true;
 					api.put('/throw_strategy/record/', {id: ids}).then((res) => {
 						this.listLoadingRevoke = false;

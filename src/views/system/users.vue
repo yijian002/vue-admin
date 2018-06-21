@@ -25,7 +25,7 @@
 		<el-dialog :title="groupFormIsAdd ? '添加用户组' : '编辑用户组'" :visible.sync="groupFormVisible" :close-on-click-modal="false" width="500px">
 		    <el-form size="small" :model="groupForm" :rules="groupFormRules" ref="groupForm" label-width="100px" style="width:360px;margin: 0 auto;">
 		        <el-form-item label="用户组名称" prop="tgroup_name" required>
-		            <el-input v-model="groupForm.tgroup_name" :disabled="groupFormIsAdd ? false : true"></el-input>
+		            <el-input v-model.trim="groupForm.tgroup_name" :disabled="groupFormIsAdd ? false : true"></el-input>
 		        </el-form-item>
 		        <el-form-item label="用户组权限">
 		     		<el-tree :data="groupMenuTree" :props="defaultProps" ref="groupMenuTree" node-key="path" show-checkbox default-expand-all check-on-click-node :expand-on-click-node="false" :default-checked-keys="groupForm.tgroup_authority"></el-tree>
@@ -45,7 +45,7 @@
             </el-row>
         </el-col>
         <el-table :data="listUser" highlight-current-row v-loading="listUserLoading" style="width: 100%; margin-top: 10px;">
-            <el-table-column prop="tuser_account" label="帐号"></el-table-column>
+            <el-table-column prop="tuser_account" label="账号"></el-table-column>
             <el-table-column prop="tuser_name" label="姓名"></el-table-column>
             <el-table-column prop="tcreater" label="创建人"></el-table-column>
             <el-table-column prop="tcreater_time" label="创建时间"></el-table-column>
@@ -62,13 +62,13 @@
 		<el-dialog :title="userFormIsAdd ? '添加用户' : '编辑用户'" :visible.sync="userFormVisible" :close-on-click-modal="false" width="400px">
 		    <el-form size="small" :model="userForm" :rules="userFormRules" ref="userForm" label-width="70px" style="width:290px;margin: 0 auto;">
 		        <el-form-item label="用户名" prop="tuser_account" required>
-		            <el-input v-model="userForm.tuser_account" :disabled="userFormIsAdd?false:true"></el-input>
+		            <el-input v-model.trim="userForm.tuser_account" :disabled="userFormIsAdd?false:true"></el-input>
 		        </el-form-item>
 		        <el-form-item label="密码" prop="tuser_pwd" required>
 		            <el-input v-model="userForm.tuser_pwd" :maxlength="20"></el-input>
 		        </el-form-item>
 		        <el-form-item label="姓名" prop="tuser_name" required>
-		            <el-input v-model="userForm.tuser_name"></el-input>
+		            <el-input v-model.trim="userForm.tuser_name"></el-input>
 		        </el-form-item>
 		        <el-form-item label="用户组" prop="tgroup_id" required>
 		            <el-select v-model="userForm.tgroup_id">

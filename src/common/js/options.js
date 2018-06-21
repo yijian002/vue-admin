@@ -1,12 +1,12 @@
 var packageType = [
-    { value: 1, label: '桌面投放' },
-    { value: 2, label: 'lol助手投放' },
-    { value: 3, label: '控制台程序' },
+    { value: 1, label: '客户端' },
+    { value: 2, label: '游戏采集数据助手' },
+    { value: 3, label: '控制台' },
     // { value: 4, label: '语音大师资源包' },
-    { value: 6, label: '计费代理投放' },
-    { value: 7, label: 'egs投放' },
-    { value: 10, label: '语音大师程序包' },
-    { value: 11, label: '游戏直启' },
+    { value: 6, label: '计费代理' },
+    { value: 7, label: 'Egs' },
+    { value: 10, label: '播报端' },
+    { value: 11, label: 'GameZq' },
 ];
 
 function mergeArr() {

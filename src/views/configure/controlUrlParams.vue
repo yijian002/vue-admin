@@ -14,7 +14,7 @@
 		<!--修改更新包-->
 		<el-dialog title="修改URL地址" :visible.sync="editFormVisible" :close-on-click-modal="false" width="600px">
 		    <el-form size="mini" :model="editForm" ref="editForm" label-width="180px">
-		        <el-form-item :label="editForm.name"><el-input v-model="editForm.url"></el-input></el-form-item>
+		        <el-form-item :label="editForm.name"><el-input v-model.trim="editForm.url"></el-input></el-form-item>
 		    </el-form>
 		    <div slot="footer" class="dialog-footer">
 		        <el-button type="primary" @click="editList(editForm.idx)">保存</el-button>
@@ -49,7 +49,8 @@
 						{name: '万象OL管理后台地址', url: res.data.wx_ol_manage_url, key: 'wx_ol_manage_url'},
 						{name: 'PubwinOL管理后台地址', url: res.data.pb_ol_manage_url, key: 'pb_ol_manage_url'},
 						{name: '全网版管理后台地址', url: res.data.total_manage_url, key: 'total_manage_url'},
-						{name: '帮助中心地址', url: res.data.helper_center_url, key: 'helper_center_url'}
+						{name: '帮助中心地址', url: res.data.helper_center_url, key: 'helper_center_url'},
+						{name: '新版本下载地址', url: res.data.version_update_url, key: 'version_update_url'}
 					];
 				});
 			},

@@ -13,7 +13,7 @@
 					this.$router.push({ path: group_authority[0] });
 				}
 				else {
-					this.$alert('登录帐号没有授权可管理的栏目', {
+					this.$alert('登录账号没有授权可管理的栏目', {
 						type: 'warning',
 						callback: ()=> {
 							this.$router.push({ path: '/login' });

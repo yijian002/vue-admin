@@ -35,6 +35,16 @@ export default {
     removeCache(name) {
         window.localStorage.removeItem(CACHE_KEYWORD + name);
     },
+    setIds(ids) {
+        if(!ids || !ids.trim()) {
+            return null;
+        }
+
+        ids = ids.split(',');
+        ids = ids.map(item => item.trim().replace(/\n/g, ''));
+
+        return ids;
+    },
     getDate(int_time, type) {
         if (String(int_time).length === 10) {
             int_time *= 1000;

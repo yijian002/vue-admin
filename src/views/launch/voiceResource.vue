@@ -28,7 +28,7 @@
 		<el-dialog title="添加语音" :visible.sync="addFormVisible" :close-on-click-modal="false" width="30%">
 		    <el-form size="mini" label-width="95px">
 		        <el-form-item label="语音文件">
-		            <el-upload class="upload-demo" ref="upload" action="/throw_strategy/voice/" :limit="1" :on-success="handleFileSuccess" :on-error="handleFileError" :on-progress="handleFileProgress" :file-list="addFileList" :data="addForm" :auto-upload="false" accept=".mp3,.wav">
+		            <el-upload class="upload-demo" ref="upload" action="/throw_strategy/voice/" :on-success="handleFileSuccess" :on-error="handleFileError" :on-progress="handleFileProgress" :file-list="addFileList" :data="addForm" :multiple="true" :auto-upload="false" accept=".mp3,.wav">
 		                <el-button size="small" type="primary">选择语音文件</el-button>
 		            </el-upload>
 		        </el-form-item>

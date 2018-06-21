@@ -47,9 +47,7 @@
 		                </el-option>
 		            </el-select>
 		        </el-form-item>
-		        <el-form-item label="版本号" prop="szipname" required>
-		            <el-input v-model="addForm.szipname" :maxlength="20"></el-input>
-		        </el-form-item>
+		        <el-form-item label="版本号" prop="szipname" required><el-input v-model.trim="addForm.szipname"></el-input></el-form-item>
 		        <el-form-item label="上传更新包" required>
 		            <el-upload class="upload-demo" action="/throw_strategy/zipfile/" :limit="1" :on-success="handleFileSuccess" :on-error="handleFileError" :file-list="addFileList" accept=".zip">
 		                <el-button  type="primary">立即上传<i class="el-icon-upload el-icon--right"></i></el-button>
@@ -68,7 +66,7 @@
 		<el-dialog title="更新策略配置" :visible.sync="updateStrategyVisible" :close-on-click-modal="false" width="1000px">
 		  	<el-table :data="updateStrategyList" highlight-current-row style="width: 100%;">
 				<el-table-column prop="filename" label="文件名"></el-table-column>
-				<el-table-column prop="szipname" label="版本号"></el-table-column>
+				<el-table-column prop="version" label="版本号"></el-table-column>
 				<el-table-column prop="iupok_txt" label="上传状态"></el-table-column>
 				<el-table-column label="默认路径">
 					<template scope="scope">
@@ -129,10 +127,12 @@
 					szipname: [{required: true, message: '请输入版本号', trigger: 'blur'}]
 				},
 				addFileList: [],
+				addFileTag: '',
 
 				// 更新策略包
 				updateStrategyVisible: false,
-				updateStrategyList: []
+				updateStrategyList: [],
+				updateStrategyInfoid: '' // 更新包序号
 			}
 		},
 		methods: {
@@ -181,6 +181,7 @@
 			handleListAdd() {
 				this.addFormVisible = true;
 				this.addFileList = [];
+				this.addFileTag = '';
 				this.addForm = {
 					szipname: '', // 更新包名
 					tag: '', // 上传文件后，后端返回的zip文件标识
@@ -196,8 +197,8 @@
 					this.$message({message: res.message, type: 'error'});
 					return;
 				}
-				this.addFileList = [res.data.tag];
-				comm.log(this.addFileList);
+				// this.addFileList = [res.data.tag];
+				this.addFileTag = res.data.tag;
 			},
 			addList() {
 				this.$refs.addForm.validate((valid) => {
@@ -211,14 +212,15 @@
 						return;
 					}
 
-					params.tag = this.addFileList.length ? this.addFileList[0] : '';
-					comm.log(params);
+					params.tag = this.addFileTag;
 					if(!params.tag) {
 						this.$message({message: '请上传更新包', type: 'warning'});
 						return;
 					}
 
+					let loading = Loading.service({ fullscreen: true, text: '正在保存更新包...' });
 					api.post('/throw_strategy/zipfile/', params).then((res) => {
+						loading.close();
 						if(res.code !== 0) {
 							this.$message({message: res.message, type: 'warning'});
 							return;
@@ -234,16 +236,18 @@
 						this.addFormVisible = false;
 						this.updateStrategyVisible = true; // 显示更新策略内容
 						this.updateStrategyList = res.data;
+						this.updateStrategyInfoid = res.infoid;
 					});
 				});
 			},
 			submitUpdateStrategy() {
 				let _this = this,
-					params = [],
+					params = {infoid: this.updateStrategyInfoid, strategy: []},
 					is_run = false;
 				for (var i = 0; i < this.updateStrategyList.length; i++) {
 					let {smd5, irun, ilevel, defaultpath} = this.updateStrategyList[i];
-					params[i] = {smd5: smd5, irun: irun, ilevel: ilevel, defaultpath: defaultpath};
+					params.strategy[i] = {smd5: smd5, irun: irun, ilevel: ilevel, defaultpath: defaultpath};
+					
 					if(!is_run && irun === 2) {
 						is_run = true;
 					}
@@ -276,7 +280,7 @@
 				}				
 			},
 			handleListExport(idx, row) { // 导出策略
-				window.location.href = '/throw_strategy/export_record/?infoid=' + row.id;
+				api.gourl('/throw_strategy/export_record/', {infoid: row.id});
 			},
 			handleListDownload(idx, row) { // 下载策略
 				if(!row.sfilepath) {
@@ -291,7 +295,6 @@
 
 				api.get('/throw_strategy/strategy/', {id: row.id}).then((res) => {
 					loading.close();
-
 					if(res.code !== 0) {
 						this.$message({message: res.message, type: 'warning'});
 						return;
@@ -319,6 +322,8 @@
 		max-height: 500px;
 		overflow-y: auto;
 		overflow-x: hidden;
+		word-wrap: break-word;
+		word-break:break-all;
 	}
 }
 </style>
