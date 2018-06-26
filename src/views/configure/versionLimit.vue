@@ -7,7 +7,7 @@
 	                <el-form-item label="限制控制台最低版本">
 			            <el-input v-model.trim="formLaunch.version" :maxlength="20" placeholder="空版本为不限制"></el-input>
 			        </el-form-item>
-			        <el-input type="textarea" v-model="formLaunch.snbids" placeholder="输入网吧账号，逗号隔开。"></el-input>
+			        <el-input type="textarea" v-model="formLaunch.snbids" placeholder="输入网吧账号，逗号或回车隔开。"></el-input>
 			        <el-button size="medium" type="primary" style="margin: 20px 0 0 20px;" @click="addLaunch">确认投放</el-button>
 			    </el-form>
         	</el-tab-pane>

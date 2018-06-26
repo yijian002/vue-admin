@@ -35,15 +35,24 @@ export default {
     removeCache(name) {
         window.localStorage.removeItem(CACHE_KEYWORD + name);
     },
-    setIds(ids) {
-        if(!ids || !ids.trim()) {
+    setIds(ids) { // Setting snbid
+        if(!ids.trim()) {
             return null;
         }
 
-        ids = ids.split(',');
-        ids = ids.map(item => item.trim().replace(/\n/g, ''));
+        ids = ids.trim().replace(/\n/g, ',').split(',');
 
-        return ids;
+        let arr_ids = [];
+        for (let i = 0; i < ids.length; i++) {
+            let id = ids[i].trim();
+            if(!id) {
+                continue;
+            }
+
+            arr_ids.push(id);
+        }
+
+        return arr_ids;
     },
     getDate(int_time, type) {
         if (String(int_time).length === 10) {

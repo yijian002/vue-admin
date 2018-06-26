@@ -30,7 +30,7 @@
                                 <el-checkbox label="强制更新" name="force_update" v-model="formPackage.force_update"></el-checkbox>
                                 <el-checkbox label="紧急更新" name="urgency" v-model="formPackage.urgency" style="margin-left: 40px;"></el-checkbox>
                             </el-col>
-                            <el-input type="textarea" v-model="formPackage.id_list" placeholder="输入网吧账号，逗号隔开。" style="margin-top: 20px;"></el-input>
+                            <el-input type="textarea" v-model="formPackage.id_list" placeholder="输入网吧账号，逗号或回车隔开。" style="margin-top: 20px;"></el-input>
 
                             <el-form-item label="更新包备注" style="margin-top:20px;">
                                <el-input v-model="formPackage.sremark"></el-input>
@@ -108,6 +108,11 @@
                         <el-option v-for="item in updatePackageFormVersion" :key="item" :label="item" :value="item"></el-option>
                     </el-select>
 		        </el-form-item>
+		        <el-form-item label="更新方式">
+                    <el-select v-model="updatePackageForm.urgency">
+                        <el-option v-for="item in options.urgencyType" :key="item.value" :label="item.label" :value="item.value"></el-option>
+                    </el-select>
+                </el-form-item>
 		        <el-form-item label="备注">{{updatePackageForm.sremark}}</el-form-item>
 		    </el-form>
 		    <div slot="footer" class="dialog-footer">
@@ -178,7 +183,8 @@
 	            options: {
 	                packageTypes: opts.packageTypes,
 	                packageType: opts.packageType,
-	                updateType: opts.forceType
+	                updateType: opts.forceType,
+	                urgencyType: opts.urgencyType
 	            },
 	            formPackage: {
 	                itype: '', // 更新包类型
@@ -211,7 +217,9 @@
 	            addPackageResultFail: [],
 
 	            updatePackageFormVisible: false,
-	            updatePackageForm: {},
+	            updatePackageForm: {
+	            	urgency: opts.urgencyType[0].value
+	            },
 	            updatePackageFormVersion: [],
 
 	            addFormPackageVisible: false,
@@ -260,7 +268,7 @@
 				}
 
 				if(!params.id_list) {
-					this.$message({message: '请输入投放的网吧账号，逗号隔开', type: 'warning'});
+					this.$message({message: '请输入投放的网吧账号，逗号或回车隔开', type: 'warning'});
 					return;
 				}
 
@@ -306,6 +314,7 @@
 			handleUpdatePackage(idx, row) {
 				this.updatePackageFormVisible = true;
 				this.updatePackageForm = row;
+				this.updatePackageForm.urgency = opts.urgencyType[0].value;
 
 				app.getPackageVersion(row.itype, 0, (list) => {
 					this.updatePackageFormVersion = list;
@@ -370,7 +379,8 @@
 				var params = {
 					szipname: this.updatePackageForm.szipname, 
 					itype: this.updatePackageForm.itype,
-					is_new: 0
+					is_new: 0,
+					urgency: this.updatePackageForm.urgency
 				};
 
 				api.put('/throw_strategy/strategy_package/', params).then((res) => {

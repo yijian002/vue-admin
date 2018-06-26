@@ -10,7 +10,7 @@
 				<el-col :span="16" style="line-height: 32px;">当前个数：{{total_num}} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;当前资源类型总大小：{{total_size}}
 					<el-button type="success" size="mini" icon="el-icon-plus" @click="addFormVisible = true;addFileList=[];" style="margin-left: 40px;">添加语音</el-button>
 				</el-col>
-				<el-col :span="8" style="text-align: right;"><el-button type="primary" icon="el-icon-refresh" size="mini" @click="updateStrategy"><b>更新策略</b></el-button></el-col>
+				<el-col :span="8" style="text-align: right;"><el-button type="warning" icon="el-icon-refresh" size="mini" @click="updateStrategyVisible=true"><b>更新策略</b></el-button></el-col>
 			</el-row>
 		</el-col>
 
@@ -38,18 +38,38 @@
 		    </div>
 		</el-dialog>
 
+		<!--更新策略-->
+		<el-dialog title="更新策略" :visible.sync="updateStrategyVisible" :close-on-click-modal="false" width="400px">
+			<el-alert type="warning" :closable="false" title="即将更新语音资源策略，请确认操作正确！" show-icon></el-alert>
+		    <el-form size="mini" :model="updateStrategyForm" ref="updateStrategyForm" label-width="95px" style="margin-top: 20px;">
+		        <el-form-item label="更新方式">
+                    <el-select v-model="updateStrategyForm.urgency">
+                        <el-option v-for="item in options.urgencyType" :key="item.value" :label="item.label" :value="item.value"></el-option>
+                    </el-select>
+                </el-form-item>
+		    </el-form>
+		    <div slot="footer" class="dialog-footer">
+		        <el-button size="small" @click="updateStrategyVisible=false;updateStrategyForm.urgency=0">取消</el-button>
+		        <el-button size="small" type="primary" @click="updateStrategy">确定</el-button>
+		    </div>
+		</el-dialog>
+
 	</section>
 </template>
 
 <script>
 	import { Loading } from 'element-ui';
 	import api from '../../api/api';
+	import opts from '../../common/js/options';
 
 	var loading_full;
 
 	export default {
 		data() {
 			return {
+				options: {
+	                urgencyType: opts.urgencyType
+	            },
 				tabs: [
 					{name: '官方语言', voice_type: 'official'},
 					{name: '女神版', voice_type: 'godess'},
@@ -66,7 +86,12 @@
 
 				addFormVisible: false,
 				addForm: {},
-				addFileList: []
+				addFileList: [],
+
+				updateStrategyVisible: false,
+				updateStrategyForm: {
+					urgency: opts.urgencyType[0].value
+				}
 			}
 		},
 		methods: {
@@ -140,17 +165,18 @@
 				});
 			},
 			updateStrategy() {
-				this.$confirm('即将更新语音资源策略，请确认操作正确！', '更新策略', {type: 'warning'}).then(() => {
-					loading_full = Loading.service({ fullscreen: true, text: '更新策略中...' });
-					api.put('/throw_strategy/voice/').then((res) => {
-						loading_full.close();
-						if(res.code !== 0) {
-							this.$message({message: res.message, type: 'warning'});
-							return;
-						}
+				this.updateStrategyVisible = false;
+				loading_full = Loading.service({ fullscreen: true, text: '更新策略中...' });
+				api.put('/throw_strategy/voice/', {urgency: this.updateStrategyForm.urgency}).then((res) => {
+					loading_full.close();
+					this.updateStrategyForm.urgency = opts.urgencyType[0].value;
 
-						this.getList();
-					});
+					if(res.code !== 0) {
+						this.$message({message: res.message, type: 'warning'});
+						return;
+					}
+
+					this.getList();
 				});
 			}
 		},
