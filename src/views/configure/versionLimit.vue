@@ -12,7 +12,7 @@
 			    </el-form>
         	</el-tab-pane>
 
-            <el-tab-pane label="查询或撤销">
+            <el-tab-pane label="查询或撤消">
             	<el-col :span="24" class="toolbar" style="padding-bottom: 0px;">
                     <el-form size="mini" :inline="true">
                         <el-form-item label="账号">
@@ -32,10 +32,25 @@
                 </el-table>
 
                 <el-col :span="24" class="toolbar">
-                    <el-button type="danger" size="mini" @click="removeList" :disabled="this.selsList.length===0">撤销选中</el-button>
+                    <el-button type="danger" size="mini" @click="removeList" :disabled="this.selsList.length===0">撤消选中</el-button>
                 </el-col>
         	</el-tab-pane>
         </el-tabs>
+
+        <!--投放结果-->
+		<el-dialog title="投放结果" :visible.sync="addLaunchResultVisible" :close-on-click-modal="false" width="800px">
+		    <el-row>
+				<el-col :span="12">
+					<div style="margin: 0 0 10px 20px;">成功：{{addLaunchResultSuccess.length}}</div>
+					<el-input type="textarea" :rows="20" :readonly="true" v-model="addLaunchResultSuccess.join('\n')"></el-input>
+				</el-col>
+				<el-col :span="12">
+					<div style="margin: 0 0 10px 20px;">失败：{{addLaunchResultFail.length}}</div>
+					<el-input type="textarea" :rows="20" :readonly="true" v-model="addLaunchResultFail.join('\n')"></el-input>
+				</el-col>
+			</el-row>
+		</el-dialog>
+
 	</section>
 </template>
 
@@ -57,7 +72,11 @@
 				},
 				listLoading: false,
 				list: [],
-				selsList: []
+				selsList: [],
+
+				addLaunchResultVisible: false,
+				addLaunchResultSuccess: [],
+				addLaunchResultFail: []
 			}
 		},
 		methods: {
@@ -82,7 +101,9 @@
 						return;
 					}
 
-					this.$message({message: '投放操作成功', type: 'success'});
+					this.addLaunchResultVisible = true;
+					this.addLaunchResultSuccess = res.data.success || [];
+					this.addLaunchResultFail = res.data.failed || [];
 					this.formLaunch = {version: '', snbids: ''};
 				});
 			},
@@ -105,7 +126,7 @@
 			removeList() {
 				let ids = this.selsList.map(item => item.id);
 
-	        	this.$confirm('正在撤销'+ ids.length +'个账号的投放，点击确定继续撤销', '撤销提示', {type: 'warning'}).then(() => {
+	        	this.$confirm('正在撤消'+ ids.length +'个账号的投放，点击确定继续撤消', '撤消提示', {type: 'warning'}).then(() => {
 					this.listLoading = true;
 					api.del('/console_configuration/version/', {id: ids}).then((res) => {
 						this.listLoading = false;
@@ -114,7 +135,7 @@
 							return;
 						}
 
-						this.$message({message: '撤销成功', type: 'success'});
+						this.$message({message: '撤消成功', type: 'success'});
 						this.getList();
 					});
 				});

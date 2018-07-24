@@ -34,5 +34,12 @@ export default {
         {value: 0, label: '流控更新'},
         {value: 1, label: '紧急更新'}
     ],
-    defaultpath: ['[DESKTOP]', '[ROOT]', '[WINDOWS]', '[CUR]']
+    defaultpath: ['[DESKTOP]', '[ROOT]', '[WINDOWS]', '[CUR]'],
+    noticeType: [
+        { value: 1, label: 'LOL活动公告', types: [1, 2] }, // types: 1-提醒公告 2-停服公告
+        { value: 2, label: '吃鸡活动公告', types: [2] },
+        { value: 3, label: '比赛日公告', types: [2] },
+        { value: 4, label: 'PUBG网吧联赛公告', types: [2] },
+        { value: 5, label: '自动加钱公告', types: [2] }
+    ]
 };

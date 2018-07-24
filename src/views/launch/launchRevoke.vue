@@ -1,4 +1,4 @@
-<!-- 投放/撤销 -->
+<!-- 投放/撤消 -->
 <template>
     <section>
         <el-tabs type="card" style="height: 200px; margin-top: 20px;">
@@ -59,7 +59,7 @@
                 </el-row>
             </el-tab-pane>
 
-            <el-tab-pane label="查询或撤销">
+            <el-tab-pane label="查询或撤消">
                 <el-col :span="24" class="toolbar" style="padding-bottom: 0px;">
                     <el-form size="mini" :inline="true">
                         <el-form-item label="更新包类型">
@@ -92,7 +92,8 @@
                 </el-table>
 
                 <el-col :span="24" class="toolbar">
-                    <el-button type="danger" size="mini" @click="removeRevokes" :disabled="this.selsRevoke.length===0">撤销选中</el-button>
+                    <el-button type="danger" size="mini" @click="removeRevokes" :disabled="this.selsRevoke.length===0">撤消选中</el-button>
+                    <el-button type="warning" size="mini" @click="removeAllRevokes" icon="el-icon-warning">撤消所有查询结果</el-button>
                     <el-pagination layout="prev, pager, next" @current-change="handleCurrentChangeRevoke" :current-page="formRevoke.page" :page-size="formRevoke.page_limit" :total="formRevoke.total" style="float:right;"></el-pagination>
                 </el-col>
             </el-tab-pane>
@@ -104,8 +105,8 @@
 		    <el-form size="mini" :model="updatePackageForm" ref="updatePackageForm" label-width="95px">
 		        <el-form-item label="更新包类型"><b>{{updatePackageForm.itype_name}}</b></el-form-item>
 		        <el-form-item label="版本号">
-		            <el-select v-model="updatePackageForm.szipname">
-                        <el-option v-for="item in updatePackageFormVersion" :key="item" :label="item" :value="item"></el-option>
+		            <el-select v-model="updatePackageForm.szipname" @change="handleUpdateFormPackageVersion">
+                        <el-option v-for="item in updatePackageFormVersion" :key="item.szipname" :label="item.szipname" :value="item.szipname"></el-option>
                     </el-select>
 		        </el-form-item>
 		        <el-form-item label="更新方式">
@@ -120,7 +121,6 @@
 		    </div>
 		</el-dialog>
 
-		<!--修改更新包-->
 		<el-dialog title="投放结果" :visible.sync="addPackageResultVisible" :close-on-click-modal="false" width="800px">
 		    <el-row>
 				<el-col :span="12">
@@ -174,6 +174,22 @@
 
 				callback(res.data || []);
 			});
+		},
+		getPackageVersionInfos(itype, idefault, callback) {
+			api.get('/throw_strategy/zipfile/', {page: 1, page_limit: 1000, itype: itype}).then((res) => {
+				if(res.code !== 0) {
+					return callback([]);
+				}
+
+				let list = [];
+				for (var i = 0; i < res.data.length; i++) {
+					if(res.data[i].idefault === idefault) {
+						list.push(res.data[i]);
+					}
+				}
+
+				callback(list);
+			});
 		}
 	};
 	
@@ -205,7 +221,7 @@
 	            },
 	            formPackageVersion: [], // 投放更新包-版本号
 	            formPackageVersionLoading: false,
-	            formRevokeVersion: [], // 查询撤销-版本号
+	            formRevokeVersion: [], // 查询撤消-版本号
 	            formRevokeVersionLoading: false,
 
 	            listPackage: {page: 1, page_limit: 100},
@@ -313,12 +329,19 @@
 			},
 			handleUpdatePackage(idx, row) {
 				this.updatePackageFormVisible = true;
-				this.updatePackageForm = row;
-				this.updatePackageForm.urgency = opts.urgencyType[0].value;
+				this.updatePackageForm = Object.assign({urgency: opts.urgencyType[0].value}, row);
 
-				app.getPackageVersion(row.itype, 0, (list) => {
+				app.getPackageVersionInfos(row.itype, 0, (list) => {
 					this.updatePackageFormVersion = list;
 				});
+			},
+			handleUpdateFormPackageVersion() {
+				for (var i = 0; i < this.updatePackageFormVersion.length; i++) {
+					if(this.updatePackageFormVersion[i].szipname === this.updatePackageForm.szipname) {
+						this.updatePackageForm.sremark = this.updatePackageFormVersion[i].sremark; // 同步显示包备注
+						break;
+					}
+				}
 			},
 			handleAddPackage() {
 				this.addFormPackageVisible = true;
@@ -330,18 +353,7 @@
 				this.updateAddFormPackageVersion();
 			},
 			updateAddFormPackageVersion() {
-				api.get('/throw_strategy/zipfile/', {page: 1, page_limit: 1000, itype: this.addFormPackage.itype}).then((res) => {
-					if(res.code !== 0) {
-						return;
-					}
-
-					let list = [];
-					for (var i = 0; i < res.data.length; i++) {
-						if(!res.data[i].idefault) {
-							list.push(res.data[i]);
-						}
-					}
-
+				app.getPackageVersionInfos(this.addFormPackage.itype, 0, (list) => {
 					this.addFormPackage.szipname = '';
 					this.addFormPackage.sremark = '';
 					this.addFormPackageVersion = list;
@@ -397,10 +409,13 @@
 			updateFormRevokeVersion() {
 				this.formRevokeVersionLoading = true;
 				app.getPackageVersion(this.formRevoke.itype, '', (list) => {
-					this.formRevoke.szipname = '';
 					this.formRevokeVersionLoading = false;
 					this.formRevokeVersion = list;
 				});
+
+				this.formRevoke.szipname = '';
+				this.formRevoke.page = 1;
+				this.getListRevoke();
 			},
 	        getListRevoke() { // 查询投放记录
 	        	let params = Object.assign({}, this.formRevoke);
@@ -433,10 +448,10 @@
 	        	this.formRevoke.page = val;
 				this.getListRevoke();
 	        },
-	        removeRevokes() { // 撤销投放
+	        removeRevokes() { // 撤消投放
 	        	let ids = this.selsRevoke.map(item => item.id);
 
-	        	this.$confirm('正在撤销'+ ids.length +'个账号的投放，点击确定继续撤销', '撤销提示', {type: 'warning'}).then(() => {
+	        	this.$confirm('正在撤消'+ ids.length +'个账号的投放，点击确定继续撤消', '撤消提示', {type: 'warning'}).then(() => {
 					this.listLoadingRevoke = true;
 					api.put('/throw_strategy/record/', {id: ids}).then((res) => {
 						this.listLoadingRevoke = false;
@@ -445,7 +460,33 @@
 							return;
 						}
 
-						this.$message({message: '撤销成功', type: 'success'});
+						this.$message({message: '撤消成功', type: 'success'});
+						this.getListRevoke();
+					});
+				});
+	        },
+	        removeAllRevokes() { // 撤消所有查询结果
+	        	let params = {
+	        		itype: this.formRevoke.itype,
+	        		szipname: this.formRevoke.szipname,
+	        		snbid: this.formRevoke.snbid
+	        	};
+
+	        	if(!params.itype) {
+	        		this.$message({message: '请选择更新包类型才可以进行撤消操作！', type: 'warning'});
+	        		return;
+	        	}
+
+	        	this.$confirm('该操作会撤消目前查询条件下所有结果数据，请确认查询结果符合你的要求！', '撤消提示', {type: 'warning'}).then(() => {
+					this.listLoadingRevoke = true;
+					api.put('/throw_strategy/record_all/', params).then((res) => {
+						this.listLoadingRevoke = false;
+						if(res.code !== 0) {
+							this.$message({message: res.message, type: 'warning'});
+							return;
+						}
+
+						this.$message({message: '撤消查询结果操作成功', type: 'success'});
 						this.getListRevoke();
 					});
 				});
@@ -456,7 +497,6 @@
 	    },
 	    mounted() {
 	    	this.getListPackage();
-	    	this.getListRevoke();
 	    	this.updateFormRevokeVersion();
 	    }
 	}

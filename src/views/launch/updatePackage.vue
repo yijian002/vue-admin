@@ -89,6 +89,7 @@
 						<el-select size="mini" v-model="scope.row.ilevel">
 			                <el-option :key="2" label="不重要" :value="2"></el-option>
 			                <el-option :key="1" label="重要" :value="1"></el-option>
+			                <el-option :key="3" label="延时下载" :value="3"></el-option>
 			            </el-select>
 		            </template>
 				</el-table-column>
@@ -221,9 +222,13 @@
 					let loading = Loading.service({ fullscreen: true, text: '正在保存更新包...' });
 					api.post('/throw_strategy/zipfile/', params).then((res) => {
 						loading.close();
-						if(res.code !== 0) {
+						if(res.code !== 0 && res.code !== 5003) {
 							this.$message({message: res.message, type: 'warning'});
 							return;
+						}
+
+						if(res.code === 5003) {
+							this.$message({message: res.message});
 						}
 
 						let iupok_status = {1: '成功', 2: '失败'};
@@ -264,6 +269,10 @@
 						_this.getList();
 						_this.$message({message: '提交更新策略配置成功', type: 'success'});
 					});
+				}
+
+				if([1, 3, 10].indexOf(this.addForm.itype) < 0) { // 控制台，客户端，播报端都必须要设置一个运行的文件 (ID定义：common/options.js)
+					is_run = true;
 				}
 
 				if(!is_run) {

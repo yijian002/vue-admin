@@ -10,6 +10,13 @@ import launchVoiceResource from './views/launch/voiceResource.vue'
 import configControlUrlParams from './views/configure/controlUrlParams.vue'
 import configVersionLimit from './views/configure/versionLimit.vue'
 import configDrive from './views/configure/drive.vue'
+import configCloseOperation from './views/configure/closeOperation.vue'
+import configApplication from './views/configure/application.vue'
+import configLockScreen from './views/configure/lockScreen.vue'
+import configAdWallpaper from './views/configure/adWallpaper.vue'
+// 公告管理
+import noticeAnnouncement from './views/notice/announcement.vue'
+import noticeList from './views/notice/list.vue'
 // 系统管理
 import systemUsers from './views/system/users.vue'
 
@@ -50,8 +57,7 @@ let def_pages = [{
     }, {
         path: '/index', // 初始页
         component: Index,
-        hidden: isHiddenMenu,
-        // redirect: { path: '/launchUpdatePackage' }
+        hidden: isHiddenMenu
     }],
     not_page = [{
         path: '*',
@@ -69,7 +75,7 @@ let menu_pages = [{
     iconCls: 'el-icon-sold-out',
     children: [
         { path: '/launchUpdatePackage', component: launchUpdatePackage, name: '更新包清单', hidden: isHiddenMenuChildren },
-        { path: '/launchRevoke', component: launchRevoke, name: '投放/撤销', hidden: isHiddenMenuChildren },
+        { path: '/launchRevoke', component: launchRevoke, name: '投放/撤消', hidden: isHiddenMenuChildren },
         { path: '/launchVoiceResource', component: launchVoiceResource, name: '语音资源', hidden: isHiddenMenuChildren },
     ]
 }, {
@@ -83,6 +89,21 @@ let menu_pages = [{
         { path: '/configControlUrlParams', component: configControlUrlParams, name: '控制台URL参数', hidden: isHiddenMenuChildren },
         { path: '/configVersionLimit', component: configVersionLimit, name: '版本限制', hidden: isHiddenMenuChildren },
         { path: '/configDrive', component: configDrive, name: '驱动配置', hidden: isHiddenMenuChildren },
+        { path: '/configCloseOperation', component: configCloseOperation, name: '关闭操作', hidden: isHiddenMenuChildren },
+        { path: '/configApplication', component: configApplication, name: '应用配置', hidden: isHiddenMenuChildren },
+        { path: '/configLockScreen', component: configLockScreen, name: '锁屏界面', hidden: isHiddenMenuChildren },
+        { path: '/configAdWallpaper', component: configAdWallpaper, name: '广告壁纸', hidden: isHiddenMenuChildren },
+    ]
+}, {
+    path: '',
+    component: Home,
+    name: '公告管理',
+    isMenu: true,
+    hidden: isHiddenMenu,
+    iconCls: 'el-icon-bell',
+    children: [
+        { path: '/noticeAnnouncement', component: noticeAnnouncement, name: '公告发布', hidden: isHiddenMenuChildren },
+        { path: '/noticeList', component: noticeList, name: '公告列表', hidden: isHiddenMenuChildren },
     ]
 }, {
     path: '',

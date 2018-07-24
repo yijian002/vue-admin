@@ -117,6 +117,37 @@ export default {
         }
 }
 </script>
+<style>
+.blue {
+    color: #409EFF;
+}
+.green {
+    color: #67c23a;
+}
+.red {
+    color: #F56C6C;
+}
+.el-form-medium .el-textarea__inner {
+    width: 100%;
+    height: 150px;
+}
+.el-form-mini .el-textarea__inner {
+    width: 100%;
+    height: 80px;
+}
+.el-tooltip-red.is-light {
+    color: red;
+}
+.el-dialog-form-textarea .el-textarea .el-textarea__inner {
+    height: 80px;
+    width: 100%;
+    margin: 0;
+}
+.el-submenu__title {
+    font-weight: bold;
+}
+</style>
+
 <style scoped lang="scss">
 @import '~scss_vars';
 .container {
